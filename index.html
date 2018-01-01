@@ -29,7 +29,7 @@
 				background-color: #ff9ff3;
 				border-radius: 0.2em;
 				border: 1px solid black;
-				box-shadow: 0.1em 0.1em 0.05em 0px rgba(0,0,0,0.75);
+				box-shadow: 0.1em 0.1em 0.05em 0 rgba(0,0,0,0.75);
 			}
 			button:nth-child(4n-2) {
 				background-color: #feca57;
@@ -71,10 +71,10 @@
 			}
 			@keyframes pulse {
 				from {
-				    box-shadow: 0px 0px 0px 0.1em rgba(0, 95, 0, 0.4);
+				    box-shadow: 0 0 0 0.1em rgba(0, 95, 0, 0.4);
 				}
 				to {
-				    box-shadow: 0px 0px 0px 0.4em rgba(0, 95, 0, 0.4);
+				    box-shadow: 0 0 0 0.4em rgba(0, 95, 0, 0.4);
 				}
 			}
 			#question {
@@ -83,7 +83,7 @@
 				border-radius: 0.01em;
 				height: 12vw;
 				line-height: 12vw;
-				box-shadow: 0.05em 0.05em 0.05em 0px rgba(0,0,0,0.75);
+				box-shadow: 0.05em 0.05em 0.05em 0 rgba(0,0,0,0.75);
 			}
 			#question.right, .right #blank {
 				color: green;
@@ -215,7 +215,7 @@
 				}
 				else if (state.language > 2) {
 					state.language--;
-					numberes_ordered = false;
+					state.ordered = false;
 					state.number = 10;
 				}
 			}
@@ -262,7 +262,7 @@
 			}
 			function ask() {
 				adjustLevel();
-				var q = [random(state.number, true), random(state.number, true)];
+				var q = [random(state.number, state.number > 2), random(state.number, state.number > 2)];
 				q.push(q[0] + q[1]);
 				var blank = random(2);
 				var answer = q[blank];
