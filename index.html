@@ -14,7 +14,6 @@
 			etc
 		convert to native app
 		functionality
-			alternate equation between (a+b=c and c=a+b)
 			add in subtraction
 			save status
 			more gamification? need to research
@@ -35,8 +34,8 @@
 				margin: 0.2em;
 				padding: 0.2em;
 			}
-			button:not([disabled]):hover {
-				cursor: hand;
+			button:not([disabled]):hover, button:not([disabled]):focus {
+				cursor: pointer;
 				color: white;
 				background-color: black;
 			}
@@ -47,25 +46,27 @@
 			button.wrong {
 				background-color: red;
 			}
-			p {
+			#question {
 				text-align: center;
-				margin: 0;
+				margin: 0.2em 0 0.5em 0;
 			}
-			p.right {
+			#question.right, .right #blank {
 				color: green;
 				font-weight: bold;
+			}
+			span {
+				border: 0.05em solid black;
+				border-radius: 0.2em;
+				padding: 0.2em;
+			}
+			#blank {
+				color: #888;
 			}
 		</style>
 	</head>
 	<body>
 
-		<p>
-			<span id="a">1</span>
-			<span id="operator">+</span>
-			<span id="b">1</span>
-			=
-			<span id="c">?</span>
-		</p>
+		<p id="question"></p>
 		<div id="answers"></div>
 
 		<script>
@@ -115,24 +116,17 @@
 				{
 					name: 'Russian words',
 					numerals: ['ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять', 'десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать', 'двадцать']
-
 				},
 				{
 					name: 'German words',
 					numerals: [ 'null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig']
 				}
 			];
-			var equation = document.getElementsByTagName('p')[0];
-			var spots = [
-				document.getElementById('a'),
-				document.getElementById('b'),
-				document.getElementById('c')
-			];
+			var equation = document.getElementById('question');
 			var answers = document.getElementById('answers');
-			var answer, blank;
 			var wrong = 0;
 			var right_streak = 0;
-			var button_for = function(n) {
+			var button_for = function(n, answer) {
 				return '<button data-correct="' + (n === answer) + '">' + numbers[random(max_lang)].numerals[n] + '</button>';
 			};
 			var ask = function() {
@@ -153,21 +147,28 @@
 				}
 				var q = [random(max_num, true), random(max_num, true)];
 				q.push(q[0] + q[1]);
-				blank = random(2);
-				answer = q[blank];
+				var blank = random(2);
+				var answer = q[blank];
 				equation.classList.remove('right');
-				q.forEach(function(num, i) {
-					spots[i].innerHTML = i === blank ? '?' : numbers[random(max_lang, true)].numerals[num];
+				var q_disp = q.map(function(num, i){
+					return i === blank ? '<span id="blank">?</span>' : '<span>' + numbers[random(max_lang, true)].numerals[num] + '</span>';
 				});
+				equation.innerHTML = q_disp[0] + ' + ' + q_disp[1];
+				if (random(1)) {
+					equation.insertAdjacentHTML('beforeend', ' = ' + q_disp[2]);
+				}
+				else {
+					equation.insertAdjacentHTML('afterbegin', q_disp[2] + ' = ');
+				}
 				var buttons = [];
 				for (var i=0; i<=(max_num*2); i++) {
-					buttons.push(button_for(i));
+					buttons.push(button_for(i, answer));
 				}
 				if (!numbers_ordered) {
 					// add duplicate numbers from different sets
 					var num_buttons = buttons.length * 1.5;
 					while (buttons.length < num_buttons) {
-						var button = button_for(random(max_num*2));
+						var button = button_for(random(max_num*2), answer);
 						if (buttons.indexOf(button) === -1) {
 							buttons.push(button);
 						}
@@ -189,7 +190,7 @@
 					e.target.setAttribute('disabled', 'disabled');
 					if (e.target.getAttribute('data-correct') === 'true') {
 						e.target.classList.add('right');
-						spots[blank].innerHTML = e.target.textContent;
+						document.getElementById('blank').innerHTML = e.target.textContent;
 						if (answers.querySelectorAll("[data-correct='true']:not(:disabled)").length === 0) {
 							equation.classList.add('right');
 							setTimeout(ask, 1000);
