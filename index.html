@@ -17,8 +17,38 @@
 			save status
 			more gamification? need to research
 		more
+
 			add audio output when clicking on numbers where audio representations exist
 	-->
+	<head>
+		<style>
+			body {
+				font-family: Sans-serif;
+				font-size: 5em;
+			}
+			button {
+				font-size: 1em;
+				margin: 0.2em;
+				padding: 0.2em;
+			}
+			button:not([disabled]):hover {
+				cursor: hand;
+				color: white;
+				background-color: black;
+			}
+			button.right, button.wrong {
+				color: white;
+				background-color: green;
+			}
+			button.wrong {
+				background-color: red;
+			}
+			p {
+				text-align: center;
+				margin: 0;
+			}
+		</style>
+	</head>
 	<body>
 
 		<p>
@@ -28,7 +58,7 @@
 			=
 			<span id="c">?</span>
 		</p>
-		<div>
+		<div id="answers">
 		</div>
 
 		<script>
@@ -83,15 +113,35 @@
 				document.getElementById('b'),
 				document.getElementById('c')
 			];
+			var answers = document.getElementById('answers');
+			var answer, blank;
 			var ask = function() {
 				var q = [random(0, 10), random(0, 10)];
 				q.push(q[0] + q[1]);
-				var blank = random(0, 2);
-
+				blank = random(0, 2);
+				answer = q[blank];
 				q.forEach(function(num, i) {
 					spots[i].innerHTML = i === blank ? '?' : numbers[random(0, numbers.length-1)].numerals[num];
 				});
+				answers.innerHTML = '';
+				for (var i=0; i<21; i++) {
+					answers.insertAdjacentHTML('beforeend', '<button data-correct="' + (i === answer) + '">' + i + '</button>');
+				}
 			};
+			answers.addEventListener('click', function(e){
+				if (e.target.tagName.toLowerCase() === 'button') {
+					e.target.setAttribute('disabled', 'disabled');
+					if (e.target.getAttribute('data-correct') === 'true') {
+						e.target.classList.add('right');
+						spots[blank].innerHTML = answer;
+						setTimeout(ask, 5000);
+					}
+					else {
+						e.target.classList.add('wrong');
+					}
+				}
+			});
+
 			ask();
 		</script>
 
