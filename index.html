@@ -1,0 +1,99 @@
+<html>
+	<!-- todo
+		sets
+			? handle feminine gender for portuguese
+			? pictograms (eg one apple, two apples)
+			american sign language
+			braille (english?)
+			Gurmukhi numerals are so similar to indian/devanagari numerals
+			? morse code
+			don't bother with semaphore
+			meta sets (.e.g "1+1" for two and a whole set of squares eg sqrt of 0 1 4 9 16 etc)
+			etc
+		functionality
+			progressive difficulty in sets
+			progressive difficulty in math (including changing operators)
+			progressive difficulty of multiple choice answers
+			save status
+			more gamification? need to research
+		more
+			add audio output when clicking on numbers where audio representations exist
+	-->
+	<body>
+
+		<p>
+			<span id="a">1</span>
+			<span id="operator">+</span>
+			<span id="b">1</span>
+			=
+			<span id="c">?</span>
+		</p>
+		<div>
+		</div>
+
+		<script>
+			var random = function(min, max) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			};
+			var numbers = [
+				{
+					name: 'Arabic numerals',
+					numerals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+				},
+				{
+					name: 'English words',
+					numerals: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty']
+				},
+				{
+					name: 'Chinese numerals',
+					numerals: ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十']
+				},
+				{
+					name: 'Spanish words',
+					numerals: ['cero', 'uno', 'dos', 'tres', 'cuatro',  'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte']
+				},
+				{
+					name: 'Roman numerals',
+					numerals: [false, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IV', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'],
+				},
+				{
+					name: 'Indian numerals',
+					numerals: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४', '१५', '१६', '१७', '१८', '१९', '२०']
+				},
+				{
+					name: 'Portuguese words',
+					numerals: ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezasseis', 'dezassete', 'dezoito', 'dezanove', 'vinte']
+				},
+				{
+					name: 'Bengali numerals',
+					numerals: ['০', '১', '২', '৪', '৫', '৬', '৭', '৮', '৯', '১০', '১১', '১২', '১৩', '১৪', '১৫', '১৬', '১৭', '১৮', '১৯', '২০']
+				},
+				{
+					name: 'Russian words',
+					numerals: ['ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять', 'десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать', 'двадцать']
+
+				},
+				{
+					name: 'German words',
+					numerals: [ 'null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig']
+				}
+			];
+			var spots = [
+				document.getElementById('a'),
+				document.getElementById('b'),
+				document.getElementById('c')
+			];
+			var ask = function() {
+				var q = [random(0, 10), random(0, 10)];
+				q.push(q[0] + q[1]);
+				var blank = random(0, 2);
+
+				q.forEach(function(num, i) {
+					spots[i].innerHTML = i === blank ? '?' : numbers[random(0, numbers.length-1)].numerals[num];
+				});
+			};
+			ask();
+		</script>
+
+	</body>
+</html>
