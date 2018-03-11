@@ -12,11 +12,8 @@
 			etc
 		convert to native app
 		functionality
-			progressive difficulty in sets
-			progressive difficulty in math (including changing operators)
-			progressive difficulty of multiple choice answers
-				mix order once moderately understood
-				duplicate some numbers, in different sets
+			alternate equation between (a+b=c and c=a+b)
+			add in subtraction
 			save status
 			more gamification? need to research
 		more
@@ -52,6 +49,10 @@
 				text-align: center;
 				margin: 0;
 			}
+			p.right {
+				color: green;
+				font-weight: bold;
+			}
 		</style>
 	</head>
 	<body>
@@ -68,8 +69,13 @@
 		<script>
 			var max_num = 2;
 			var max_lang = 2;
-			var random = function(max) {
-				return Math.floor(Math.random() * (max + 1));
+			var numbers_ordered = true;
+			var random = function(max, skew_high) {
+				if (typeof skew_high === 'undefined') {
+					return Math.floor(Math.random() * (max + 1));
+				}
+				// skews by rolling twice and picking higher
+				return Math.floor(Math.max(Math.random() * (max + 1), Math.random() * (max + 1)));
 			};
 			var numbers = [
 				{
@@ -114,6 +120,7 @@
 					numerals: [ 'null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig']
 				}
 			];
+			var equation = document.getElementsByTagName('p')[0];
 			var spots = [
 				document.getElementById('a'),
 				document.getElementById('b'),
@@ -121,29 +128,78 @@
 			];
 			var answers = document.getElementById('answers');
 			var answer, blank;
+			var wrong = 0;
+			var right_streak = 0;
+			var button_for = function(n) {
+				return '<button data-correct="' + (n === answer) + '">' + numbers[random(max_lang)].numerals[n] + '</button>';
+			};
 			var ask = function() {
-				var q = [random(max_num), random(max_num)];
+				if (right_streak === 4) {
+					if (numbers_ordered) {
+						numbers_ordered = false;
+					}
+					else if (max_num < 10) {
+						max_num +=2;
+						numbers_ordered = true;
+					}
+					else if (max_lang <= numbers.length) {
+						max_num = 2;
+						numbers_ordered = true;
+						max_lang++;
+					}
+					right_streak = 0;
+				}
+				var q = [random(max_num, true), random(max_num, true)];
 				q.push(q[0] + q[1]);
 				blank = random(2);
 				answer = q[blank];
+				equation.classList.remove('right');
 				q.forEach(function(num, i) {
-					spots[i].innerHTML = i === blank ? '?' : numbers[random(max_lang)].numerals[num];
+					spots[i].innerHTML = i === blank ? '?' : numbers[random(max_lang, true)].numerals[num];
 				});
-				answers.innerHTML = '';
-				for (var i=0; i<21; i++) {
-					answers.insertAdjacentHTML('beforeend', '<button data-correct="' + (i === answer) + '">' + numbers[random(max_lang)].numerals[i] + '</button>');
+				var buttons = [];
+				for (var i=0; i<=(max_num*2); i++) {
+					buttons.push(button_for(i));
 				}
+				if (!numbers_ordered) {
+					// add duplicate numbers from different sets
+					var num_buttons = buttons.length * 1.5;
+					while (buttons.length < num_buttons) {
+						var button = button_for(random(max_num*2));
+						if (buttons.indexOf(button) === -1) {
+							buttons.push(button);
+						}
+
+					}
+					// randomize order
+					var buttons_random = [];
+					while (buttons.length) {
+						var i = random(buttons.length-1);
+						buttons_random.push(buttons[i]);
+						buttons.splice(i, 1);
+					}
+					buttons = buttons_random;
+				}
+				answers.innerHTML = buttons.join('');
 			};
 			answers.addEventListener('click', function(e){
 				if (e.target.tagName.toLowerCase() === 'button') {
 					e.target.setAttribute('disabled', 'disabled');
 					if (e.target.getAttribute('data-correct') === 'true') {
 						e.target.classList.add('right');
-						spots[blank].innerHTML = answer;
-						setTimeout(ask, 3000);
+						spots[blank].innerHTML = e.target.textContent;
+						if (answers.querySelectorAll("[data-correct='true']:not(:disabled)").length === 0) {
+							equation.classList.add('right');
+							setTimeout(ask, 1000);
+							if (wrong === 0) {
+								right_streak++;
+							}
+							wrong = 0;
+						}
 					}
 					else {
 						e.target.classList.add('wrong');
+						wrong++;
 					}
 				}
 			});
