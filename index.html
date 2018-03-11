@@ -10,15 +10,20 @@
 			don't bother with semaphore
 			meta sets (.e.g "1+1" for two and a whole set of squares eg sqrt of 0 1 4 9 16 etc)
 			etc
+		convert to native app
 		functionality
 			progressive difficulty in sets
 			progressive difficulty in math (including changing operators)
 			progressive difficulty of multiple choice answers
+				mix order once moderately understood
+				duplicate some numbers, in different sets
 			save status
 			more gamification? need to research
 		more
-
 			add audio output when clicking on numbers where audio representations exist
+		colours, themes, transitions, animations
+			transition from one question to the next
+			animate correct button moving to '?' ?
 	-->
 	<head>
 		<style>
@@ -27,7 +32,7 @@
 				font-size: 5em;
 			}
 			button {
-				font-size: 1em;
+				font-size: 0.8em;
 				margin: 0.2em;
 				padding: 0.2em;
 			}
@@ -58,12 +63,13 @@
 			=
 			<span id="c">?</span>
 		</p>
-		<div id="answers">
-		</div>
+		<div id="answers"></div>
 
 		<script>
-			var random = function(min, max) {
-				return Math.floor(Math.random() * (max - min + 1)) + min;
+			var max_num = 2;
+			var max_lang = 2;
+			var random = function(max) {
+				return Math.floor(Math.random() * (max + 1));
 			};
 			var numbers = [
 				{
@@ -116,16 +122,16 @@
 			var answers = document.getElementById('answers');
 			var answer, blank;
 			var ask = function() {
-				var q = [random(0, 10), random(0, 10)];
+				var q = [random(max_num), random(max_num)];
 				q.push(q[0] + q[1]);
-				blank = random(0, 2);
+				blank = random(2);
 				answer = q[blank];
 				q.forEach(function(num, i) {
-					spots[i].innerHTML = i === blank ? '?' : numbers[random(0, numbers.length-1)].numerals[num];
+					spots[i].innerHTML = i === blank ? '?' : numbers[random(max_lang)].numerals[num];
 				});
 				answers.innerHTML = '';
 				for (var i=0; i<21; i++) {
-					answers.insertAdjacentHTML('beforeend', '<button data-correct="' + (i === answer) + '">' + i + '</button>');
+					answers.insertAdjacentHTML('beforeend', '<button data-correct="' + (i === answer) + '">' + numbers[random(max_lang)].numerals[i] + '</button>');
 				}
 			};
 			answers.addEventListener('click', function(e){
@@ -134,7 +140,7 @@
 					if (e.target.getAttribute('data-correct') === 'true') {
 						e.target.classList.add('right');
 						spots[blank].innerHTML = answer;
-						setTimeout(ask, 5000);
+						setTimeout(ask, 3000);
 					}
 					else {
 						e.target.classList.add('wrong');
