@@ -41,16 +41,19 @@
 			body {
 				font-family: Sans-serif;
 				font-size: 5em;
+				text-align: center;
 			}
 			button {
 				font-size: 0.8em;
-				margin: 0.2em;
-				padding: 0.2em;
+				margin: 0.3em;
+				padding: 0 0.3em;
+				height: 2em;
 			}
-			button:not([disabled]):hover, button:not([disabled]):focus {
+			button span {
+				vertical-align: middle;
+			}
+			button:not([disabled]):hover {
 				cursor: pointer;
-				color: white;
-				background-color: black;
 			}
 			button.right, button.wrong {
 				color: white;
@@ -61,14 +64,13 @@
 				font-weight: bold;
 			}
 			#question {
-				text-align: center;
 				margin: 0.5em 0;
 			}
 			#question.right, .right #blank {
 				color: green;
 				font-weight: bold;
 			}
-			span {
+			#question span {
 				border: 0.05em solid black;
 				border-radius: 0.2em;
 				padding: 0.2em;
@@ -84,6 +86,11 @@
 		<div id="answers"></div>
 
 		<script>
+
+			function realLength(s) { // source: https://mathiasbynens.be/notes/javascript-unicode
+				return s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
+			}
+
 			var max_num = 2;
 			var max_lang = 2;
 			var numbers_ordered = true;
@@ -97,7 +104,7 @@
 			var numbers = [
 				{
 					name: 'Arabic numerals',
-					numerals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+					numerals: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
 				},
 				{
 					name: 'English words',
@@ -111,10 +118,12 @@
 					name: 'Spanish words',
 					numerals: ['cero', 'uno', 'dos', 'tres', 'cuatro',  'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte']
 				},
+				/*
 				{
 					name: 'Roman numerals',
 					numerals: [false, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IV', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'],
 				},
+				*/
 				{
 					name: 'Indian numerals',
 					numerals: ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४', '१५', '१६', '१७', '१८', '१९', '२०']
@@ -123,10 +132,12 @@
 					name: 'Portuguese words',
 					numerals: ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezasseis', 'dezassete', 'dezoito', 'dezanove', 'vinte']
 				},
+				/*
 				{
 					name: 'Bengali numerals',
 					numerals: ['০', '১', '২', '৪', '৫', '৬', '৭', '৮', '৯', '১০', '১১', '১২', '১৩', '১৪', '১৫', '১৬', '১৭', '১৮', '১৯', '২০']
 				},
+				*/
 				{
 					name: 'Russian words',
 					numerals: ['ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять', 'десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать', 'двадцать']
@@ -140,7 +151,8 @@
 			var answers = document.getElementById('answers');
 			var historylog = []; // array of recent questions, each is # of incorrect responses
 			var button_for = function(n, answer) {
-				return '<button data-correct="' + (n === answer) + '">' + numbers[random(max_lang)].numerals[n] + '</button>';
+				var text = numbers[random(max_lang)].numerals[n];
+				return '<button data-correct="' + (n === answer) + '"><span style="font-size:' + (1-((realLength(text)-1)*0.05)) + 'em">' + text + '</span></button>';
 			};
 			function increaseLevel() {
 				if (numbers_ordered) {
@@ -255,18 +267,22 @@
 				historylog.unshift(0);
 			};
 			answers.addEventListener('click', function(e){
-				if (e.target.tagName.toLowerCase() === 'button') {
-					e.target.setAttribute('disabled', 'disabled');
-					if (e.target.getAttribute('data-correct') === 'true') {
-						e.target.classList.add('right');
-						document.getElementById('blank').innerHTML = e.target.textContent;
+				var elm = e.target;
+				if (elm.tagName.toLowerCase() === 'span') {
+					elm = elm.parentElement;
+				}
+				if (elm.tagName.toLowerCase() === 'button') {
+					elm.setAttribute('disabled', 'disabled');
+					if (elm.getAttribute('data-correct') === 'true') {
+						elm.classList.add('right');
+						document.getElementById('blank').innerHTML = elm.textContent;
 						if (answers.querySelectorAll("[data-correct='true']:not(:disabled)").length === 0) {
 							equation.classList.add('right');
 							setTimeout(ask, 1000);
 						}
 					}
 					else {
-						e.target.classList.add('wrong');
+						elm.classList.add('wrong');
 						historylog[0]++;
 					}
 				}
