@@ -2,24 +2,37 @@
 <html>
 	<meta charset="utf-8">
 	<!-- todo
+		progression
+			ensure questions are not repeated (even if flipped or whichever) within # questions
+		math
+			add in subtraction
+			replace a+b=c model with one where either side of the equals symbol can have 1 or more numbers on it; how to progress?
 		sets
+			handle missing zero in roman numerals
 			? handle feminine gender for portuguese
 			? pictograms (eg one apple, two apples)
 			american sign language
+				use non-animated drawing with 'play' icon beneath
+				https://www.wikiwand.com/en/SignWriting
+				https://aslfont.github.io/Symbol-Font-For-ASL/ways-to-write.html
+				http://www.lifeprint.com/asl101/pages-signs/n/numbers1-10.htm
 			braille (english?)
-			Gurmukhi numerals are so similar to indian/devanagari numerals
+			Gurmukhi numerals (and bengali) are so similar to indian/devanagari numerals
 			? morse code
 			don't bother with semaphore
 			meta sets (.e.g "1+1" for two and a whole set of squares eg sqrt of 0 1 4 9 16 etc)
 			etc
 		convert to native app
+		internationalize
 		functionality
-			add in subtraction
 			save status
 			more gamification? need to research
+			distinguish sets, especially important as 3 in indian numerals looks like an 8
 		more
 			add audio output when clicking on numbers where audio representations exist
-		colours, themes, transitions, animations
+			maybe with sound icon
+			can get some(all?) on wikipedia, although voices and volumes are inconsistent
+		colours, themes, transitions, animations, sound effects
 			transition from one question to the next
 			animate correct button moving to '?' ?
 	-->
@@ -41,10 +54,11 @@
 			}
 			button.right, button.wrong {
 				color: white;
-				background-color: green;
-			}
-			button.wrong {
 				background-color: red;
+			}
+			button.right {
+				background-color: green;
+				font-weight: bold;
 			}
 			#question {
 				text-align: center;
@@ -124,27 +138,81 @@
 			];
 			var equation = document.getElementById('question');
 			var answers = document.getElementById('answers');
-			var wrong = 0;
-			var right_streak = 0;
+			var historylog = []; // array of recent questions, each is # of incorrect responses
 			var button_for = function(n, answer) {
 				return '<button data-correct="' + (n === answer) + '">' + numbers[random(max_lang)].numerals[n] + '</button>';
 			};
-			var ask = function() {
-				if (right_streak === 4) {
-					if (numbers_ordered) {
-						numbers_ordered = false;
-					}
-					else if (max_num < 10) {
-						max_num +=2;
-						numbers_ordered = true;
-					}
-					else if (max_lang <= numbers.length) {
-						max_num = 2;
-						numbers_ordered = true;
-						max_lang++;
-					}
-					right_streak = 0;
+			function increaseLevel() {
+				if (numbers_ordered) {
+					numbers_ordered = false;
 				}
+				else if (max_num < 10) {
+					max_num +=2;
+					numbers_ordered = true;
+				}
+				else if (max_lang <= numbers.length) {
+					max_num = 2;
+					numbers_ordered = true;
+					max_lang++;
+				}
+			}
+			function decreaseLevel() {
+				if (!numbers_ordered) {
+					numbers_ordered = true;
+				}
+				else if (max_num > 2) {
+					max_num -=2;
+					numbers_ordered = false;
+				}
+				else if (max_lang > 2) {
+					max_lang--;
+					numberes_ordered = false;
+					max_num = 10;
+				}
+			}
+			function adjustLevel(){
+				if (historylog.length < 4) {
+					return;
+				}
+
+				// level up
+				var right_streak = historylog.findIndex(function(n){
+					return n !== 0;
+				});
+				right_streak = right_streak !== -1 ? right_streak : historylog.length;
+				// advance after 4 more correct in a row
+				if (right_streak && right_streak % 4 === 0) {
+					increaseLevel();
+					// advance extra after 12 more correct in a row
+					if (right_streak % 12 === 0) {
+						increaseLevel();
+					}
+				}
+
+				// level down
+				else if (!right_streak && historylog.length > 2) {
+					// if they've made 3 mistakes each in the last 3 questions
+					if (historylog[0] >=3 && historylog[1] >=3 && historylog[2] >=3) {
+						decreaseLevel();
+					}
+					// if they haven't gotten a perfect answer in the last 5 questions
+					else if (historylog.length > 5) {
+						var last_correct = historylog.findIndex(function(n){
+							return n === 0;
+						});
+						if (last_correct === -1 || last_correct > 5) {
+							decreaseLevel();
+						}
+					}
+				}
+
+				// no need to store older history
+				if (historylog.length === 24) {
+					historylog.splice(12, 12);
+				}
+			}
+			function ask() {
+				adjustLevel();
 				var q = [random(max_num, true), random(max_num, true)];
 				q.push(q[0] + q[1]);
 				var blank = random(2);
@@ -184,6 +252,7 @@
 					buttons = buttons_random;
 				}
 				answers.innerHTML = buttons.join('');
+				historylog.unshift(0);
 			};
 			answers.addEventListener('click', function(e){
 				if (e.target.tagName.toLowerCase() === 'button') {
@@ -194,15 +263,11 @@
 						if (answers.querySelectorAll("[data-correct='true']:not(:disabled)").length === 0) {
 							equation.classList.add('right');
 							setTimeout(ask, 1000);
-							if (wrong === 0) {
-								right_streak++;
-							}
-							wrong = 0;
 						}
 					}
 					else {
 						e.target.classList.add('wrong');
-						wrong++;
+						historylog[0]++;
 					}
 				}
 			});
