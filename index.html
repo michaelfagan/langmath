@@ -44,12 +44,20 @@
 				text-align: center;
 				padding: 0;
 				margin: 0;
+				background: linear-gradient(to bottom right, blue, lightblue, blue);
+				height: 100vh;
+				overflow: hidden;
 			}
 			button {
-				font-size: 0.8em;
-				margin: 0.3em;
+				font-size: 0.7em;
+				margin: 0.1em;
 				padding: 0 0.3em;
 				height: 2em;
+				background-color: lightpink;
+				border-radius: 0.2em;
+			}
+			button, #question {
+				box-shadow: 0.05em 0.05em 0.05em 0px rgba(0,0,0,0.75);
 			}
 			button span {
 				vertical-align: middle;
@@ -66,8 +74,9 @@
 				font-weight: bold;
 			}
 			#question {
-				margin: 0.5em 0;
-				border-bottom: 2px solid #ccc;
+				margin: 0.2em 2em;
+				background-color: white;
+				border-radius: 0.01em;
 			}
 			#question.right, .right #blank {
 				color: green;
