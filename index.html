@@ -42,6 +42,8 @@
 				font-family: Sans-serif;
 				font-size: 5em;
 				text-align: center;
+				padding: 0;
+				margin: 0;
 			}
 			button {
 				font-size: 0.8em;
@@ -65,15 +67,11 @@
 			}
 			#question {
 				margin: 0.5em 0;
+				border-bottom: 2px solid #ccc;
 			}
 			#question.right, .right #blank {
 				color: green;
 				font-weight: bold;
-			}
-			#question span {
-				border: 0.05em solid black;
-				border-radius: 0.2em;
-				padding: 0.2em;
 			}
 			#blank {
 				color: #888;
@@ -87,8 +85,10 @@
 
 		<script>
 
-			function realLength(s) { // source: https://mathiasbynens.be/notes/javascript-unicode
-				return s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
+			function adjustSize(text) {
+				// length via // source: https://mathiasbynens.be/notes/javascript-unicode
+				var length = text.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
+				return '<span style="font-size:' + (1-((length-1)*0.05)) + 'em">' + text + '</span>';
 			}
 
 			var state = {
@@ -154,8 +154,8 @@
 			var equation = document.getElementById('question');
 			var answers = document.getElementById('answers');
 			var button_for = function(n, answer) {
-				var text = numbers[random(state.language)].numerals[n];
-				return '<button data-correct="' + (n === answer) + '"><span style="font-size:' + (1-((realLength(text)-1)*0.05)) + 'em">' + text + '</span></button>';
+				var text = adjustSize(numbers[random(state.language)].numerals[n]);
+				return '<button data-correct="' + (n === answer) + '">' + text + '</button>';
 			};
 			function increaseLevel() {
 				if (state.ordered) {
@@ -234,7 +234,7 @@
 				var answer = q[blank];
 				equation.classList.remove('right');
 				var q_disp = q.map(function(num, i){
-					return i === blank ? '<span id="blank">?</span>' : '<span>' + numbers[random(state.language, true)].numerals[num] + '</span>';
+					return i === blank ? '<span id="blank">?</span>' : adjustSize(numbers[random(state.language, true)].numerals[num]);
 				});
 				equation.innerHTML = q_disp[0] + ' + ' + q_disp[1];
 				if (random(1)) {
