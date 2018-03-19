@@ -91,9 +91,13 @@
 				return s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
 			}
 
-			var max_num = 2;
-			var max_lang = 2;
-			var numbers_ordered = true;
+			var state = {
+				number: 2,
+				language: 2,
+				ordered: true,
+				history: []
+			};
+
 			var random = function(max, skew_high) {
 				if (typeof skew_high === 'undefined') {
 					return Math.floor(Math.random() * (max + 1));
@@ -149,49 +153,48 @@
 			];
 			var equation = document.getElementById('question');
 			var answers = document.getElementById('answers');
-			var historylog = []; // array of recent questions, each is # of incorrect responses
 			var button_for = function(n, answer) {
-				var text = numbers[random(max_lang)].numerals[n];
+				var text = numbers[random(state.language)].numerals[n];
 				return '<button data-correct="' + (n === answer) + '"><span style="font-size:' + (1-((realLength(text)-1)*0.05)) + 'em">' + text + '</span></button>';
 			};
 			function increaseLevel() {
-				if (numbers_ordered) {
-					numbers_ordered = false;
+				if (state.ordered) {
+					state.ordered = false;
 				}
-				else if (max_num < 10) {
-					max_num +=2;
-					numbers_ordered = true;
+				else if (state.number < 10) {
+					state.number +=2;
+					state.ordered = true;
 				}
-				else if (max_lang <= numbers.length) {
-					max_num = 2;
-					numbers_ordered = true;
-					max_lang++;
+				else if (state.language <= numbers.length) {
+					state.number = 2;
+					state.ordered = true;
+					state.language++;
 				}
 			}
 			function decreaseLevel() {
-				if (!numbers_ordered) {
-					numbers_ordered = true;
+				if (!state.ordered) {
+					state.ordered = true;
 				}
-				else if (max_num > 2) {
-					max_num -=2;
-					numbers_ordered = false;
+				else if (state.number > 2) {
+					state.number -=2;
+					state.ordered = false;
 				}
-				else if (max_lang > 2) {
-					max_lang--;
+				else if (state.language > 2) {
+					state.language--;
 					numberes_ordered = false;
-					max_num = 10;
+					state.number = 10;
 				}
 			}
 			function adjustLevel(){
-				if (historylog.length < 4) {
+				if (state.history.length < 4) {
 					return;
 				}
 
 				// level up
-				var right_streak = historylog.findIndex(function(n){
+				var right_streak = state.history.findIndex(function(n){
 					return n !== 0;
 				});
-				right_streak = right_streak !== -1 ? right_streak : historylog.length;
+				right_streak = right_streak !== -1 ? right_streak : state.history.length;
 				// advance after 4 more correct in a row
 				if (right_streak && right_streak % 4 === 0) {
 					increaseLevel();
@@ -202,14 +205,14 @@
 				}
 
 				// level down
-				else if (!right_streak && historylog.length > 2) {
+				else if (!right_streak && state.history.length > 2) {
 					// if they've made 3 mistakes each in the last 3 questions
-					if (historylog[0] >=3 && historylog[1] >=3 && historylog[2] >=3) {
+					if (state.history[0] >=3 && state.history[1] >=3 && state.history[2] >=3) {
 						decreaseLevel();
 					}
 					// if they haven't gotten a perfect answer in the last 5 questions
-					else if (historylog.length > 5) {
-						var last_correct = historylog.findIndex(function(n){
+					else if (state.history.length > 5) {
+						var last_correct = state.history.findIndex(function(n){
 							return n === 0;
 						});
 						if (last_correct === -1 || last_correct > 5) {
@@ -219,19 +222,19 @@
 				}
 
 				// no need to store older history
-				if (historylog.length === 24) {
-					historylog.splice(12, 12);
+				if (state.history.length === 24) {
+					state.history.splice(12, 12);
 				}
 			}
 			function ask() {
 				adjustLevel();
-				var q = [random(max_num, true), random(max_num, true)];
+				var q = [random(state.number, true), random(state.number, true)];
 				q.push(q[0] + q[1]);
 				var blank = random(2);
 				var answer = q[blank];
 				equation.classList.remove('right');
 				var q_disp = q.map(function(num, i){
-					return i === blank ? '<span id="blank">?</span>' : '<span>' + numbers[random(max_lang, true)].numerals[num] + '</span>';
+					return i === blank ? '<span id="blank">?</span>' : '<span>' + numbers[random(state.language, true)].numerals[num] + '</span>';
 				});
 				equation.innerHTML = q_disp[0] + ' + ' + q_disp[1];
 				if (random(1)) {
@@ -241,14 +244,14 @@
 					equation.insertAdjacentHTML('afterbegin', q_disp[2] + ' = ');
 				}
 				var buttons = [];
-				for (var i=0; i<=(max_num*2); i++) {
+				for (var i=0; i<=(state.number*2); i++) {
 					buttons.push(button_for(i, answer));
 				}
-				if (!numbers_ordered) {
+				if (!state.ordered) {
 					// add duplicate numbers from different sets
 					var num_buttons = buttons.length * 1.5;
 					while (buttons.length < num_buttons) {
-						var button = button_for(random(max_num*2), answer);
+						var button = button_for(random(state.number*2), answer);
 						if (buttons.indexOf(button) === -1) {
 							buttons.push(button);
 						}
@@ -264,7 +267,7 @@
 					buttons = buttons_random;
 				}
 				answers.innerHTML = buttons.join('');
-				historylog.unshift(0);
+				state.history.unshift(0);
 			};
 			answers.addEventListener('click', function(e){
 				var elm = e.target;
@@ -283,7 +286,7 @@
 					}
 					else {
 						elm.classList.add('wrong');
-						historylog[0]++;
+						state.history[0]++;
 					}
 				}
 			});
