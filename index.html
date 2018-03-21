@@ -82,6 +82,10 @@
 				background-color: green;
 				font-weight: bold;
 			}
+			button.hint {
+				/* to be replaced by pulsing animation */
+				border: 5px solid green;
+			}
 			#question {
 				margin: 0.2em 2em;
 				background-color: white;
@@ -113,8 +117,16 @@
 				number: 2,
 				language: 2,
 				ordered: true,
-				history: []
+				history: [],
+				timer: false
 			};
+
+			function resetTimer() {
+				clearTimeout(state.timer);
+				state.timer = setTimeout(function(){
+					answers.querySelectorAll("[data-correct='true']:not(:disabled)")[0].classList.add('hint');
+				}, 10000);
+			}
 
 			var random = function(max, skew_high) {
 				if (typeof skew_high === 'undefined') {
@@ -286,6 +298,7 @@
 				}
 				answers.innerHTML = buttons.join('');
 				state.history.unshift(0);
+				resetTimer();
 			};
 			answers.addEventListener('click', function(e){
 				var elm = e.target;
@@ -293,9 +306,14 @@
 					elm = elm.parentElement;
 				}
 				if (elm.tagName.toLowerCase() === 'button') {
+					resetTimer();
 					elm.setAttribute('disabled', 'disabled');
 					if (elm.getAttribute('data-correct') === 'true') {
 						elm.classList.add('right');
+						if (elm.classList.contains('hint')) {
+							elm.classList.remove('hint');
+							state.history[0]++; // using a hint counts as a mistake
+						}
 						document.getElementById('blank').innerHTML = elm.textContent;
 						if (answers.querySelectorAll("[data-correct='true']:not(:disabled)").length === 0) {
 							equation.classList.add('right');
