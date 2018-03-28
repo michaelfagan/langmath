@@ -52,7 +52,9 @@
 				font-size: 0.7em;
 				margin: 0.1em;
 				padding: 0 0.3em;
-				height: 2em;
+				min-width: 2em;
+				height: 6rem;
+				line-height: 5rem;
 				background-color: #ff9ff3;
 				border-radius: 0.2em;
 			}
@@ -80,7 +82,6 @@
 			}
 			button.right {
 				background-color: green;
-				font-weight: bold;
 			}
 			button.hint {
 				/* to be replaced by pulsing animation */
@@ -125,7 +126,7 @@
 				clearTimeout(state.timer);
 				state.timer = setTimeout(function(){
 					answers.querySelectorAll("[data-correct='true']:not(:disabled)")[0].classList.add('hint');
-				}, 10000);
+				}, 18000);
 			}
 
 			var random = function(max, skew_high) {
