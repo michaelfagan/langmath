@@ -1,62 +1,34 @@
 <!DOCTYPE html>
 <html>
 	<meta charset="utf-8">
-	<!-- todo
-		progression
-			ensure questions are not repeated (even if flipped or whichever) within # questions
-		math
-			add in subtraction
-			replace a+b=c model with one where either side of the equals symbol can have 1 or more numbers on it; how to progress?
-		sets
-			handle missing zero in roman numerals
-			? handle feminine gender for portuguese
-			? pictograms (eg one apple, two apples)
-			american sign language
-				use non-animated drawing with 'play' icon beneath
-				https://www.wikiwand.com/en/SignWriting
-				https://aslfont.github.io/Symbol-Font-For-ASL/ways-to-write.html
-				http://www.lifeprint.com/asl101/pages-signs/n/numbers1-10.htm
-			braille (english?)
-			Gurmukhi numerals (and bengali) are so similar to indian/devanagari numerals
-			? morse code
-			don't bother with semaphore
-			meta sets (.e.g "1+1" for two and a whole set of squares eg sqrt of 0 1 4 9 16 etc)
-			etc
-		convert to native app
-		internationalize
-		functionality
-			save status
-			more gamification? need to research
-			distinguish sets, especially important as 3 in indian numerals looks like an 8
-		more
-			add audio output when clicking on numbers where audio representations exist
-			maybe with sound icon
-			can get some(all?) on wikipedia, although voices and volumes are inconsistent
-		colours, themes, transitions, animations, sound effects
-			transition from one question to the next
-			animate correct button moving to '?' ?
-	-->
 	<head>
 		<style>
 			body {
 				font-family: Sans-serif;
-				font-size: 5em;
+				font-size: 9vw;
 				text-align: center;
-				padding: 0;
+				padding: 0.2em;
 				margin: 0;
 				background: linear-gradient(to bottom right, blue, lightblue, blue);
 				height: 100vh;
 				overflow: hidden;
 			}
+			body.alternate {
+				background: linear-gradient(to top right, #ff6528, #ffd3be, #ff6528);
+			}
+			#answers {
+				font-size: 1vmax;
+			}
 			button {
-				font-size: 0.7em;
-				margin: 0.1em;
+				font-size: 4em;
+				margin: 0.2em;
 				padding: 0 0.3em;
 				min-width: 2em;
-				height: 6rem;
-				line-height: 5rem;
+				height: 8vmax;
+				line-height: 8vmax;
 				background-color: #ff9ff3;
 				border-radius: 0.2em;
+				box-shadow: 0.1em 0.1em 0.05em 0px rgba(0,0,0,0.75);
 			}
 			button:nth-child(4n-2) {
 				background-color: #feca57;
@@ -66,9 +38,6 @@
 			}
 			button:nth-child(4n) {
 				background-color: #c8d6e5;
-			}
-			button, #question {
-				box-shadow: 0.05em 0.05em 0.05em 0px rgba(0,0,0,0.75);
 			}
 			button span {
 				vertical-align: middle;
@@ -88,9 +57,12 @@
 				border: 5px solid green;
 			}
 			#question {
-				margin: 0.2em 2em;
+				margin: 0 0 1rem 0;
 				background-color: white;
 				border-radius: 0.01em;
+				height: 12vw;
+				line-height: 12vw;
+				box-shadow: 0.05em 0.05em 0.05em 0px rgba(0,0,0,0.75);
 			}
 			#question.right, .right #blank {
 				color: green;
@@ -188,7 +160,16 @@
 				var text = adjustSize(numbers[random(state.language)].numerals[n]);
 				return '<button data-correct="' + (n === answer) + '">' + text + '</button>';
 			};
+			function switchBackground() {
+				if (document.body.classList.contains('alternate')) {
+					document.body.classList.remove('alternate');
+				}
+				else {
+					document.body.classList.add('alternate');
+				}
+			}
 			function increaseLevel() {
+				switchBackground();
 				if (state.ordered) {
 					state.ordered = false;
 				}
@@ -203,6 +184,7 @@
 				}
 			}
 			function decreaseLevel() {
+				switchBackground();
 				if (!state.ordered) {
 					state.ordered = true;
 				}
