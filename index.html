@@ -119,7 +119,7 @@
 				clearTimeout(state.timer);
 				state.timer = setTimeout(function(){
 					answers.querySelectorAll("[data-correct='true']:not(:disabled)")[0].classList.add('hint');
-				}, 6000 * Math.sqrt(answers.querySelectorAll('button:not(:disabled').length));
+				}, 6000 * Math.sqrt(answers.querySelectorAll('button:not(:disabled)').length));
 			}
 
 			var random = function(max, skew_high) {
